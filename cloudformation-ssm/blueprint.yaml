@@ -1,0 +1,78 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/6.2.0/types.yaml
+  - plugin:cloudify-aws-plugin
+
+inputs:
+
+  parameter_name:
+    description: Name of the SSM parameter to create
+    display_label: SSM Parameter Name
+    default: TestParameter
+
+  value_1_parameter:
+    description: Value for "key1" in the created JSON
+    display_label: Value 1 Parameter
+    default: Hello
+
+  value_2_parameter:
+    description: Value for "key2" in the created JSON
+    display_label: Value 2 Parameter
+    default: World
+
+  aws_region_name:
+    description: The AWS region
+    display_label: AWS Region
+    default: us-west-2
+
+node_templates:
+
+  ssm_parameter:
+    type: cloudify.nodes.aws.CloudFormation.Stack
+    properties:
+      client_config:
+        aws_access_key_id: { get_secret: aws_access_key_id }
+        aws_secret_access_key: { get_secret: aws_secret_access_key }
+        region_name: { get_input: aws_region_name }
+      resource_config:
+        kwargs:
+          StackName: { get_input: parameter_name }
+          Parameters:
+            - ParameterKey: ParameterName
+              ParameterValue: { get_input: parameter_name }
+            - ParameterKey: Value1Parameter
+              ParameterValue: { get_input: value_1_parameter }
+            - ParameterKey: Value2Parameter
+              ParameterValue: { get_input: value_2_parameter }
+          TemplateBody:
+            AWSTemplateFormatVersion: "2010-09-09"
+            Parameters:
+              ParameterName:
+                Type: String
+                Default: Test
+              Value1Parameter:
+                Type: String
+                Default: value1
+              Value2Parameter:
+                Type: String
+                Default: value2
+            Resources:
+              SSMParameter:
+                Type: 'AWS::SSM::Parameter'
+                Properties:
+                  Name:
+                    Ref: ParameterName
+                  Type: String
+                  Value:
+                    Fn::Sub:
+                      - |
+                        {
+                          "key1": "${value1}"
+                          "key2": "${value2}"
+                        }
+                      - value1:
+                          Ref: Value1Parameter
+                        value2:
+                          Ref: Value2Parameter
+

@@ -1,0 +1,11 @@
+rest_calls:
+
+  - path: /repos/{{ repository_owner }}/{{ repository_name }}/actions/workflows/{{ workflow_name }}/dispatches
+    method: POST
+    headers:
+      Content-type: application/json
+      Authorization: token {{ auth_token }}
+    payload:
+      ref: main
+    response_format: raw
+    

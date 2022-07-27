@@ -1,0 +1,12 @@
+rest_calls:
+
+  - path: /repos/{{ repository_owner }}/{{ repository_name }}/actions/runs/{{ run_id }}
+    method: GET
+    headers:
+      Content-type: application/json
+      Authorization: token {{ auth_token }}
+    response_format: json
+    response_translation:
+      status: [ run_status ]
+    response_expectation:
+      - ['status', 'completed']

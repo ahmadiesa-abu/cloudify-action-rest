@@ -1,0 +1,13 @@
+rest_calls:
+
+  - path: /repos/{{ repository_owner }}/{{ repository_name }}/actions/workflows/{{ workflow_name }}/runs?per_page=1
+    method: GET
+    headers:
+      Content-type: application/json
+      Authorization: token {{ auth_token }}
+    response_format: json
+    response_translation:
+      workflow_runs:
+        - id: [ run_id ]
+    response_expectation:
+      - ['workflow_runs', 0, 'id', "^(?!{{ previous_run_id }})"]

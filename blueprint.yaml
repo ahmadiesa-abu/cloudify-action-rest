@@ -1,0 +1,169 @@
+tosca_definitions_version: cloudify_dsl_1_3
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/6.2.0/types.yaml
+  - plugin:cloudify-utilities-plugin
+
+inputs:
+
+  repository_owner:
+    description: Owner/account of the repository
+    display_label: Repository Owner
+    default: acritelli
+
+  repository_name:
+    description: Name of the repository
+    display_label: Repository Name
+    default: cloudify-action-rest
+
+node_templates:
+
+  run_simple_workflow:
+    type: cloudify.rest.Requests
+    properties:
+      host: api.github.com
+      port: 443
+      ssl: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        precreate:
+          implementation: rest.cloudify_rest.tasks.execute
+          inputs:
+            template_file: templates/get-previous-run.yaml
+            save_path: previous_run_id
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-basic-script.yaml
+              auth_token: { get_secret: github_token }
+        create:
+          inputs:
+            template_file: templates/run-workflow.yaml
+            save_path: workflow_run
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-basic-script.yaml
+              auth_token: { get_secret: github_token }
+              previous_run_id: { get_attribute: [ SELF, previous_run_id, result_properties, previous_run_id ] }
+        configure:
+          inputs:
+            template_file: templates/get-run-id.yaml
+            save_path: workflow_run
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-basic-script.yaml
+              auth_token: { get_secret: github_token }
+              previous_run_id: { get_attribute: [ SELF, previous_run_id, result_properties, previous_run_id ] }
+        start:
+          inputs:
+            template_file: templates/get-workflow-status.yaml
+            save_path: run_status
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              auth_token: { get_secret: github_token }
+              run_id: { get_attribute: [ SELF, workflow_run, result_properties, run_id ] }
+
+  run_workflow_with_delay:
+    type: cloudify.rest.Requests
+    properties:
+      host: api.github.com
+      port: 443
+      ssl: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        precreate:
+          implementation: rest.cloudify_rest.tasks.execute
+          inputs:
+            template_file: templates/get-previous-run.yaml
+            save_path: previous_run_id
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-script-with-delay.yaml
+              auth_token: { get_secret: github_token }
+        create:
+          inputs:
+            template_file: templates/run-workflow.yaml
+            save_path: workflow_run
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-script-with-delay.yaml
+              auth_token: { get_secret: github_token }
+              previous_run_id: { get_attribute: [ SELF, previous_run_id, result_properties, previous_run_id ] }
+        configure:
+          inputs:
+            template_file: templates/get-run-id.yaml
+            save_path: workflow_run
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-script-with-delay.yaml
+              auth_token: { get_secret: github_token }
+              previous_run_id: { get_attribute: [ SELF, previous_run_id, result_properties, previous_run_id ] }
+        start:
+          inputs:
+            template_file: templates/get-workflow-status.yaml
+            save_path: run_status
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              auth_token: { get_secret: github_token }
+              run_id: { get_attribute: [ SELF, workflow_run, result_properties, run_id ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: run_simple_workflow
+
+  run_workflow_with_inputs:
+    type: cloudify.rest.Requests
+    properties:
+      host: api.github.com
+      port: 443
+      ssl: true
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        precreate:
+          implementation: rest.cloudify_rest.tasks.execute
+          inputs:
+            template_file: templates/get-previous-run.yaml
+            save_path: previous_run_id
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-script-with-inputs.yaml
+              auth_token: { get_secret: github_token }
+        create:
+          inputs:
+            template_file: templates/run-workflow-with-inputs.yaml
+            save_path: workflow_run
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-script-with-inputs.yaml
+              auth_token: { get_secret: github_token }
+              previous_run_id: { get_attribute: [ SELF, previous_run_id, result_properties, previous_run_id ] }
+        configure:
+          inputs:
+            template_file: templates/get-run-id.yaml
+            save_path: workflow_run
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              workflow_name: run-script-with-inputs.yaml
+              auth_token: { get_secret: github_token }
+              previous_run_id: { get_attribute: [ SELF, previous_run_id, result_properties, previous_run_id ] }
+        start:
+          inputs:
+            template_file: templates/get-workflow-status.yaml
+            save_path: run_status
+            params:
+              repository_owner: { get_input: repository_owner }
+              repository_name: { get_input: repository_name }
+              auth_token: { get_secret: github_token }
+              run_id: { get_attribute: [ SELF, workflow_run, result_properties, run_id ] }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: run_workflow_with_delay

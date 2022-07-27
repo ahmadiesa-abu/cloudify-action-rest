@@ -1,0 +1,11 @@
+name: run_basic_script
+on:
+  workflow_dispatch:
+jobs:
+  develop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run script
+        run: ./workflow_scripts/basic_script.sh

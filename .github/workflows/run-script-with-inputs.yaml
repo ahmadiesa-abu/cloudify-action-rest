@@ -1,0 +1,13 @@
+name: run_script_with_inputs
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+jobs:
+  develop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run script
+        run: echo "${{ github.event.inputs.message }}"
