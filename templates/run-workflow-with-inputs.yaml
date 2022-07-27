@@ -6,8 +6,7 @@ rest_calls:
       Content-type: application/json
       Authorization: token {{ auth_token }}
     payload:
-      ref: main
+      ref: master
       inputs:
         message: "test message"
     response_format: raw
-    

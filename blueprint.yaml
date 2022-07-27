@@ -9,7 +9,7 @@ inputs:
   repository_owner:
     description: Owner/account of the repository
     display_label: Repository Owner
-    default: acritelli
+    default: ahmadiesa-abu
 
   repository_name:
     description: Name of the repository

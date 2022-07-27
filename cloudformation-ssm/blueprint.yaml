@@ -9,17 +9,17 @@ inputs:
   parameter_name:
     description: Name of the SSM parameter to create
     display_label: SSM Parameter Name
-    default: TestParameter
+    default: TestParameterNew
 
   value_1_parameter:
     description: Value for "key1" in the created JSON
     display_label: Value 1 Parameter
-    default: Hello
+    default: HelloNew
 
   value_2_parameter:
     description: Value for "key2" in the created JSON
     display_label: Value 2 Parameter
-    default: World
+    default: WorldNew
 
   aws_region_name:
     description: The AWS region
@@ -75,4 +75,3 @@ node_templates:
                           Ref: Value1Parameter
                         value2:
                           Ref: Value2Parameter
-
